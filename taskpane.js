@@ -68,47 +68,76 @@ function formatToAPIString(rawDateStr) {
     return "";
 }
 
+function setRunStatus(msg, color) {
+    const box = document.getElementById("run-status");
+    box.style.display = "block";
+    box.style.color = color || "#333";
+    box.textContent = msg;
+}
+
 async function runExchangeRateFetch() {
     const currency = document.getElementById("currency-input").value.trim().toUpperCase();
-    if (!currency || !dateRangeAddress || !targetRangeAddress) {
-        console.error("통화 및 범위를 모두 지정해주세요.");
+
+    if (!currency) {
+        setRunStatus("통화 코드를 입력해주세요. (예: USD)", "#c00");
+        return;
+    }
+    if (!dateRangeAddress) {
+        setRunStatus("1단계: 날짜 범위를 먼저 지정해주세요.", "#c00");
+        return;
+    }
+    if (!targetRangeAddress) {
+        setRunStatus("2단계: 결과 출력 범위를 먼저 지정해주세요.", "#c00");
         return;
     }
 
-    await Excel.run(async (context) => {
-        const sheet = context.workbook.worksheets.getActiveWorksheet();
-        const dateRange = sheet.getRange(dateRangeAddress);
-        const targetRange = sheet.getRange(targetRangeAddress);
+    setRunStatus("환율 조회 중...", "#555");
+    document.getElementById("btn-run").disabled = true;
 
-        dateRange.load("text");
-        await context.sync();
+    try {
+        await Excel.run(async (context) => {
+            const sheet = context.workbook.worksheets.getActiveWorksheet();
+            const dateRange = sheet.getRange(dateRangeAddress);
+            const targetRange = sheet.getRange(targetRangeAddress);
 
-        let dateValues = dateRange.text;
-        let resultValues = [];
+            dateRange.load("text");
+            await context.sync();
 
-        for (let i = 0; i < dateValues.length; i++) {
-            let rawDate = dateValues[i][0];
-            let formattedDate = formatToAPIString(rawDate);
+            let dateValues = dateRange.text;
+            let resultValues = [];
+            let successCount = 0;
 
-            if (formattedDate.length === 8) {
-                try {
-                    const response = await fetch(`${API_BASE}/get_rate?date=${formattedDate}&currency=${currency}`);
-                    const result = await response.json();
+            for (let i = 0; i < dateValues.length; i++) {
+                let rawDate = dateValues[i][0];
+                let formattedDate = formatToAPIString(rawDate);
 
-                    if (result.rate !== undefined) {
-                        resultValues.push([result.rate]);
-                    } else {
-                        resultValues.push(["데이터없음"]);
+                if (formattedDate.length === 8) {
+                    try {
+                        const response = await fetch(`${API_BASE}/get_rate?date=${formattedDate}&currency=${currency}`);
+                        const result = await response.json();
+
+                        if (result.rate !== undefined) {
+                            resultValues.push([result.rate]);
+                            successCount++;
+                        } else {
+                            resultValues.push(["데이터없음"]);
+                        }
+                    } catch (error) {
+                        resultValues.push(["연결실패"]);
                     }
-                } catch (error) {
-                    resultValues.push(["연결실패"]);
+                } else {
+                    resultValues.push([""]);
                 }
-            } else {
-                resultValues.push([""]);
             }
-        }
 
-        targetRange.values = resultValues;
-        await context.sync();
-    });
+            targetRange.values = resultValues;
+            await context.sync();
+
+            setRunStatus(`완료: ${successCount}/${dateValues.length}건 조회됨`, "#217346");
+        });
+    } catch (e) {
+        setRunStatus("오류: " + e.message, "#c00");
+    } finally {
+        document.getElementById("btn-run").disabled = false;
+    }
 }
