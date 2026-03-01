@@ -118,12 +118,24 @@
             margin-top: 5px;
             word-wrap: break-word;
         }
+
+        .version-badge {
+            display: inline-block;
+            font-size: 11px;
+            color: #888;
+            background: #f0f0f0;
+            border-radius: 3px;
+            padding: 1px 6px;
+            margin-left: 6px;
+            vertical-align: middle;
+            font-weight: normal;
+        }
     </style>
 </head>
 
 <body>
 
-    <h2>FXManager (환율 로더)</h2>
+    <h2>FXManager (환율 로더)<span class="version-badge" id="app-version"></span></h2>
 
     <div class="section">
         <label>통화 코드</label>
