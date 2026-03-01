@@ -15,16 +15,17 @@
             margin: 0;
             padding: 15px;
             color: #333;
+            background: #fff;
         }
 
         h2 {
             font-size: 16px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             color: #217346;
         }
 
         .section {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         label {
@@ -34,6 +35,127 @@
             font-size: 14px;
         }
 
+        /* ── 모드 탭 ── */
+        .mode-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .mode-tab {
+            flex: 1;
+            padding: 10px 4px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 12.5px;
+            font-weight: 600;
+            background: #f9f9f9;
+            border: none;
+            border-right: 1px solid #ccc;
+            color: #666;
+            transition: all 0.15s;
+            line-height: 1.3;
+        }
+
+        .mode-tab:last-child {
+            border-right: none;
+        }
+
+        .mode-tab:hover {
+            background: #e8f5ee;
+        }
+
+        .mode-tab.active {
+            background: #217346;
+            color: white;
+        }
+
+        .mode-source {
+            font-size: 10px;
+            display: block;
+            margin-top: 2px;
+            font-weight: normal;
+            opacity: 0.75;
+        }
+
+        /* ── ECOS 설정 ── */
+        .ecos-section {
+            display: none;
+            background: #f0f7f3;
+            border: 1px solid #c8e0d4;
+            border-radius: 5px;
+            padding: 10px 12px;
+            margin-bottom: 16px;
+            animation: fadeIn 0.2s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ecos-section label {
+            font-size: 12px;
+            margin-bottom: 4px;
+            color: #217346;
+        }
+
+        .ecos-key-row {
+            display: flex;
+            gap: 6px;
+        }
+
+        .ecos-key-row input {
+            flex: 1;
+            padding: 7px 8px;
+            border: 1px solid #c8e0d4;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .ecos-key-row input:focus {
+            outline: none;
+            border-color: #217346;
+        }
+
+        .btn-small {
+            padding: 7px 12px;
+            font-size: 11px;
+            background: #217346;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .btn-small:hover {
+            background: #1a5c38;
+        }
+
+        .ecos-key-status {
+            display: none;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .ecos-info {
+            font-size: 11px;
+            color: #666;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        .ecos-currencies {
+            color: #217346;
+            font-weight: 600;
+        }
+
+        /* ── 통화 드롭다운 ── */
         .combo-wrapper {
             position: relative;
         }
@@ -93,6 +215,7 @@
             background-color: #e8f5ee;
         }
 
+        /* ── 버튼 ── */
         .btn {
             background-color: #217346;
             color: white;
@@ -106,9 +229,27 @@
         }
 
         .btn:hover {
-            background-color: #1e6b41;
+            background-color: #1a5c38;
         }
 
+        .btn:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+
+        .btn-run {
+            background-color: #0078d4;
+        }
+
+        .btn-run:hover {
+            background-color: #106ebe;
+        }
+
+        .btn-run:disabled {
+            background-color: #aaa;
+        }
+
+        /* ── 상태 박스 ── */
         .status-box {
             background-color: #f3f2f1;
             padding: 10px;
@@ -117,6 +258,13 @@
             font-size: 12px;
             margin-top: 5px;
             word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .date-hint {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
         }
 
         .version-badge {
@@ -130,6 +278,12 @@
             vertical-align: middle;
             font-weight: normal;
         }
+
+        .divider {
+            border: none;
+            border-top: 1px solid #e1dfdd;
+            margin: 16px 0;
+        }
     </style>
 </head>
 
@@ -137,6 +291,36 @@
 
     <h2>FXManager (환율 로더)<span class="version-badge" id="app-version"></span></h2>
 
+    <!-- ── 모드 탭 ── -->
+    <div class="mode-tabs">
+        <div class="mode-tab active" data-mode="daily">
+            일별(기말)
+            <span class="mode-source">수출입은행</span>
+        </div>
+        <div class="mode-tab" data-mode="monthly">
+            월평균
+            <span class="mode-source">ECOS</span>
+        </div>
+        <div class="mode-tab" data-mode="yearly">
+            연평균
+            <span class="mode-source">ECOS</span>
+        </div>
+    </div>
+
+    <!-- ── ECOS 설정 (월평균/연평균 선택 시 표시) ── -->
+    <div class="ecos-section" id="ecos-section">
+        <label>🔑 ECOS 인증키</label>
+        <div class="ecos-key-row">
+            <input type="password" id="ecos-key-input" placeholder="한국은행 ECOS API 인증키">
+            <button class="btn-small" id="btn-save-ecos-key">저장</button>
+        </div>
+        <div class="ecos-key-status" id="ecos-key-status"></div>
+        <div class="ecos-info">
+            ECOS 지원 통화: <span class="ecos-currencies">USD, JPY, EUR, GBP, CNY 등 22개</span>
+        </div>
+    </div>
+
+    <!-- ── 통화 코드 ── -->
     <div class="section">
         <label>통화 코드</label>
         <div class="combo-wrapper" id="combo-wrapper">
@@ -146,27 +330,33 @@
         </div>
     </div>
 
+    <hr class="divider">
+
+    <!-- ── 날짜 범위 ── -->
     <div class="section">
         <label>1. 날짜 범위 지정</label>
         <button id="btn-set-date" class="btn">현재 선택한 범위로 지정</button>
         <div class="status-box" id="date-range-address">선택 안됨</div>
+        <div class="date-hint" id="date-hint">날짜 형식: 2024-12-31, 20241231 등</div>
     </div>
 
+    <!-- ── 결과 출력 범위 ── -->
     <div class="section">
         <label>2. 결과 출력 범위 지정</label>
         <button id="btn-set-target" class="btn">현재 선택한 범위로 지정</button>
         <div class="status-box" id="target-range-address">선택 안됨</div>
     </div>
 
-    <div class="section" style="margin-top: 30px;">
-        <button id="btn-run" class="btn" style="background-color: #0078d4;">환율 정보 가져오기</button>
+    <!-- ── 실행 ── -->
+    <div class="section" style="margin-top: 20px;">
+        <button id="btn-run" class="btn btn-run">환율 정보 가져오기 (수출입은행)</button>
         <div class="status-box" id="run-status" style="display:none; margin-top: 8px;"></div>
     </div>
 
     <script type="text/javascript" src="taskpane.js"></script>
 
     <script>
-        // 커스텀 드롭다운 로직
+        // ── 커스텀 드롭다운 로직 ──
         let allCurrencies = [];
         let activeIndex = -1;
 
@@ -237,7 +427,6 @@
             if (items[activeIndex]) items[activeIndex].scrollIntoView({ block: "nearest" });
         });
 
-        // taskpane.js의 loadCurrencies가 allCurrencies를 채워줌
         window.setCurrencyList = function(list) {
             allCurrencies = list;
         };
