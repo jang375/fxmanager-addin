@@ -1,3 +1,4 @@
+const APP_VERSION = "v1.0.0";
 const API_BASE = "https://fx-proxy.jang375a-03c.workers.dev";
 
 let dateRangeAddress = "";
@@ -8,6 +9,7 @@ Office.onReady((info) => {
         document.getElementById("btn-set-date").onclick = setDateRange;
         document.getElementById("btn-set-target").onclick = setTargetRange;
         document.getElementById("btn-run").onclick = runExchangeRateFetch;
+        document.getElementById("app-version").textContent = APP_VERSION;
         loadCurrencies();
     }
 });
