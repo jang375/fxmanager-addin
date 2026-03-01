@@ -1,0 +1,112 @@
+const API_BASE = "https://fx-proxy.jang375a-03c.workers.dev";
+
+let dateRangeAddress = "";
+let targetRangeAddress = "";
+
+Office.onReady((info) => {
+    if (info.host === Office.HostType.Excel) {
+        document.getElementById("btn-set-date").onclick = setDateRange;
+        document.getElementById("btn-set-target").onclick = setTargetRange;
+        document.getElementById("btn-run").onclick = runExchangeRateFetch;
+        loadCurrencies();
+    }
+});
+
+async function loadCurrencies() {
+    try {
+        const response = await fetch(`${API_BASE}/get_currencies`);
+        const list = await response.json();
+        if (typeof window.setCurrencyList === "function") {
+            window.setCurrencyList(list);
+        }
+    } catch (e) {
+        // 통화 목록 로드 실패 시 무시 (수동 입력 가능)
+    }
+}
+
+async function setDateRange() {
+    await Excel.run(async (context) => {
+        const range = context.workbook.getSelectedRange();
+        range.load("address");
+        await context.sync();
+        dateRangeAddress = range.address;
+        document.getElementById("date-range-address").innerText = dateRangeAddress;
+    });
+}
+
+async function setTargetRange() {
+    await Excel.run(async (context) => {
+        const range = context.workbook.getSelectedRange();
+        range.load("address");
+        await context.sync();
+        targetRangeAddress = range.address;
+        document.getElementById("target-range-address").innerText = targetRangeAddress;
+    });
+}
+
+function formatToAPIString(rawDateStr) {
+    if (!rawDateStr) return "";
+    const str = String(rawDateStr).trim();
+
+    if (/^\d{8}$/.test(str)) return str;
+
+    if (/^\d{5}$/.test(str)) {
+        const d = new Date(Date.UTC(1899, 11, 30) + parseInt(str) * 86400000);
+        return d.getUTCFullYear().toString() +
+               String(d.getUTCMonth() + 1).padStart(2, '0') +
+               String(d.getUTCDate()).padStart(2, '0');
+    }
+
+    let m = str.match(/(\d{4})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})/);
+    if (m) return m[1] + m[2].padStart(2, '0') + m[3].padStart(2, '0');
+
+    m = str.match(/(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);
+    if (m) return m[1] + m[2].padStart(2, '0') + m[3].padStart(2, '0');
+
+    return "";
+}
+
+async function runExchangeRateFetch() {
+    const currency = document.getElementById("currency-input").value.trim().toUpperCase();
+    if (!currency || !dateRangeAddress || !targetRangeAddress) {
+        console.error("통화 및 범위를 모두 지정해주세요.");
+        return;
+    }
+
+    await Excel.run(async (context) => {
+        const sheet = context.workbook.worksheets.getActiveWorksheet();
+        const dateRange = sheet.getRange(dateRangeAddress);
+        const targetRange = sheet.getRange(targetRangeAddress);
+
+        dateRange.load("text");
+        await context.sync();
+
+        let dateValues = dateRange.text;
+        let resultValues = [];
+
+        for (let i = 0; i < dateValues.length; i++) {
+            let rawDate = dateValues[i][0];
+            let formattedDate = formatToAPIString(rawDate);
+
+            if (formattedDate.length === 8) {
+                try {
+                    const response = await fetch(`${API_BASE}/get_rate?date=${formattedDate}&currency=${currency}`);
+                    const result = await response.json();
+
+                    if (result.rate !== undefined) {
+                        resultValues.push([result.rate]);
+                    } else {
+                        resultValues.push(["데이터없음"]);
+                    }
+                } catch (error) {
+                    resultValues.push(["연결실패"]);
+                }
+            } else {
+                resultValues.push([""]);
+            }
+        }
+
+        targetRange.values = resultValues;
+        await context.sync();
+    });
+}

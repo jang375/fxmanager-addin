@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp 
+          xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" 
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+          xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" 
+          xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
+          xsi:type="TaskPaneApp">
+
+  <Id>b29efb71-2ed2-4c27-ac01-c88f11a43a75</Id>
+
+  <Version>1.0.0.0</Version>
+  <ProviderName>Internal</ProviderName>
+  <DefaultLocale>ko-KR</DefaultLocale>
+  
+  <DisplayName DefaultValue="FXManager Rate Loader" />
+  <Description DefaultValue="Load Exchange Rates from KEXIM API." />
+  
+  <IconUrl DefaultValue="https://jang375.github.io/fxmanager-addin/rate_icon-32.png" />
+  <HighResolutionIconUrl DefaultValue="https://jang375.github.io/fxmanager-addin/rate_icon-80.png" />
+  <SupportUrl DefaultValue="https://jang375.github.io/fxmanager-addin" />
+  
+  <AppDomains>
+    <AppDomain>https://jang375.github.io</AppDomain>
+    <AppDomain>https://fx-proxy.jang375a-03c.workers.dev</AppDomain>
+  </AppDomains>
+
+  <Hosts>
+    <Host Name="Workbook" />
+  </Hosts>
+
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://jang375.github.io/fxmanager-addin/taskpane.html" />
+  </DefaultSettings>
+
+  <Permissions>ReadWriteDocument</Permissions>
+
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Hosts>
+      <Host xsi:type="Workbook">
+        <DesktopFormFactor>
+          <GetStarted>
+            <Title resid="GetStarted.Title"/>
+            <Description resid="GetStarted.Description"/>
+            <LearnMoreUrl resid="GetStarted.LearnMoreUrl"/>
+          </GetStarted>
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <OfficeTab id="TabHome">
+              <Group id="CommandsGroup">
+                <Label resid="CommandsGroup.Label" />
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16x16" />
+                  <bt:Image size="32" resid="Icon.32x32" />
+                  <bt:Image size="80" resid="Icon.80x80" />
+                </Icon>
+                <Control xsi:type="Button" id="TaskpaneButton">
+                  <Label resid="TaskpaneButton.Label" />
+                  <Supertip>
+                    <Title resid="TaskpaneButton.Label" />
+                    <Description resid="TaskpaneButton.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16" />
+                    <bt:Image size="32" resid="Icon.32x32" />
+                    <bt:Image size="80" resid="Icon.80x80" />
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>ButtonId1</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url" />
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+
+    <Resources>
+      <bt:Images>
+        <bt:Image id="Icon.16x16" DefaultValue="https://jang375.github.io/fxmanager-addin/rate_icon-16.png" />
+        <bt:Image id="Icon.32x32" DefaultValue="https://jang375.github.io/fxmanager-addin/rate_icon-32.png" />
+        <bt:Image id="Icon.80x80" DefaultValue="https://jang375.github.io/fxmanager-addin/rate_icon-80.png" />
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://go.microsoft.com/fwlink/?LinkId=276812" />
+        <bt:Url id="Taskpane.Url" DefaultValue="https://jang375.github.io/fxmanager-addin/taskpane.html" />
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="GetStarted.Title" DefaultValue="Get started with FXManager" />
+        <bt:String id="CommandsGroup.Label" DefaultValue="FXManager" />
+        <bt:String id="TaskpaneButton.Label" DefaultValue="환율 가져오기" />
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="GetStarted.Description" DefaultValue="Open Taskpane." />
+        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to open the taskpane." />
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>
